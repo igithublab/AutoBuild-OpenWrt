@@ -2,6 +2,7 @@
 # Description: Build OpenWrt using GitHub Actions
 # Lisence: MIT
 # Author: Ivan Liao
+# Date: 2020-06-29
 #=================================================
 
 name: Build_wn575a3
