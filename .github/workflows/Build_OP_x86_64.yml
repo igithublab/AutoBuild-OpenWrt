@@ -30,20 +30,16 @@ jobs:
       uses: actions/checkout@master
 
     - name: Initialization environment
-      working-directory: ./
       env:
         DEBIAN_FRONTEND: noninteractive
         CONFIG_FILE: 'x86_64.config'
-        CUST_FILE: 'customize.sh'
       run: |
         docker rmi `docker images -q`
         echo "Deleting files, please wait ..."
         
         mkdir openwrt
         [ -e $CONFIG_FILE ] && mv $CONFIG_FILE openwrt/.config
-        [ -e $CUST_FILE ]   && mv $CONFIG_FILE openwrt/
-        cd openwrt
-        chmod +x $CUST_FILE
+        chmod +x ./customize.sh && ./customize.sh
         
         sudo rm -rf \
           /usr/share/dotnet \
