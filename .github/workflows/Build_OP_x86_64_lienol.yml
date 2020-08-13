@@ -67,7 +67,7 @@ jobs:
         cd lean
         git clone https://github.com/fw876/helloworld
         mkdir microsocks && cd microsocks && wget https://github.com/coolsnowwolf/lede/blob/master/package/lean/microsocks/Makefile && cd ..
-        mkdir redsocks2  && cd redsocks2  && wget https://github.com/coolsnowwolf/lede/tree/master/package/lean/redsocks2           && cd ..
+        mkdir redsocks2  && cd redsocks2  && wget https://github.com/coolsnowwolf/lede/tree/master/package/lean/redsocks2/Makefile  && cd ..
         
     - name: Update & Install feeds
       working-directory: ./openwrt
