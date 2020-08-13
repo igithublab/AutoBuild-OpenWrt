@@ -72,8 +72,6 @@ jobs:
         echo src-git kenzo https://github.com/V2RaySSR/openwrt-packages >> ./feeds.conf.default
         echo src-git small https://github.com/V2RaySSR/small >> ./feeds.conf.default
         ./scripts/feeds update -a
-        ./scripts/feeds update -a
-        ./scripts/feeds install -a
         ./scripts/feeds install -a
 
     #- name: Import external feeds
