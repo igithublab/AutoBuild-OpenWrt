@@ -11,9 +11,9 @@ on:
   release:
     types: [published]
 
-  #push:
-  #  branches: 
-  #    - master
+  push:
+    branches: 
+      - master
 
   #schedule:
   #  - cron: 0 8 * * 5
@@ -69,14 +69,11 @@ jobs:
       env: 
         REPO_URL: https://github.com/coolsnowwolf/lede
       run: |
-        #git clone $REPO_URL
-        #scp -rp lede/package/lean/microsocks openwrt/package/lean/
-        #scp -rp lede/package/lean/redsocks2  openwrt/package/lean/
+        git clone $REPO_URL
+        scp -rp lede/package/lean/microsocks openwrt/package/lean/
+        scp -rp lede/package/lean/redsocks2  openwrt/package/lean/
         cd openwrt/package/lean/
         git clone https://github.com/fw876/helloworld
-        mkdir microsocks && cd microsocks && wget https://github.com/coolsnowwolf/lede/blob/master/package/lean/microsocks/Makefile && cd ..
-        mkdir redsocks2  && cd redsocks2  && wget https://github.com/coolsnowwolf/lede/tree/master/package/lean/redsocks2/Makefile  && cd ..
-        ls -l
         
     - name: Update & Install feeds
       working-directory: ./openwrt
