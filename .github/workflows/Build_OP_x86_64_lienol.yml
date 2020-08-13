@@ -11,9 +11,9 @@ on:
   release:
     types: [published]
 
-  push:
-    branches: 
-      - master
+  #push:
+  #  branches: 
+  #    - master
 
   #schedule:
   #  - cron: 0 8 * * 5
@@ -83,6 +83,7 @@ jobs:
       run: |
         ./scripts/feeds clean
         ./scripts/feeds update -a
+        ./scripts/feeds install -a
         ./scripts/feeds install -a
         # fix upx issue
         #cd staging_dir/host/bin/
