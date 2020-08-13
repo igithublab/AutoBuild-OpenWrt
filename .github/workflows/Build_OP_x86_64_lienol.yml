@@ -1,0 +1,113 @@
+#=================================================
+# Description: Build OpenWrt using GitHub Actions
+# Lisence: MIT
+# Author: Ivan Liao
+# Date: 2020-08-13
+#=================================================
+
+name: Build_x86_64_Lienol
+
+on: 
+  release:
+    types: [published]
+
+  push:
+    branches: 
+      - master
+
+  #schedule:
+  #  - cron: 0 8 * * 5
+  
+  #watch:
+  #  types: [started]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout
+      uses: actions/checkout@master
+
+    - name: Initialization environment
+      env:
+        DEBIAN_FRONTEND: noninteractive
+      run: |
+        docker rmi `docker images -q`
+        echo "Deleting files, please wait ..."
+        sudo rm -rf \
+          /usr/share/dotnet \
+          /etc/mysql \
+          /etc/php
+        sudo -E apt-get -y purge \
+          azure-cli \
+          ghc* \
+          zulu* \
+          hhvm \
+          llvm* \
+          firefox \
+          google* \
+          dotnet* \
+          powershell \
+          openjdk* \
+          mysql* \
+          php*
+        sudo -E apt-get update
+        sudo -E apt-get -y install build-essential asciidoc binutils bzip2 gawk gettext git libncurses5-dev patch unzip lib32gcc1 libc6-dev-i386 subversion flex node-uglify gcc-multilib g++-multilib p7zip p7zip-full msmtp libssl-dev texinfo libglib2.0-dev xmlto qemu-utils libelf-dev autoconf automake libtool autopoint device-tree-compiler libuv-dev python3.6 zlib1g-dev upx-ucl antlr3 gperf libz-dev python3.5 python2.7 uglifyjs git-core upx
+        sudo -E apt-get -y autoremove --purge
+        sudo -E apt-get clean
+    - name: Clone source code
+      env: 
+        REPO_URL: https://github.com/Lienol/openwrt
+        REPO_BRANCH: dev-19.07
+      run: |
+        git clone -b $REPO_BRANCH $REPO_URL openwrt
+        cd openwrt/package && git clone  https://github.com/Lienol/openwrt-package
+        # add Lean's helloworld here
+        cd lean
+        git clone https://github.com/fw876/helloworld
+        mkdir microsocks && cd microsocks && wget https://github.com/coolsnowwolf/lede/blob/master/package/lean/microsocks/Makefile && cd ..
+        mkdir redsocks2  && cd redsocks2  && wget https://github.com/coolsnowwolf/lede/tree/master/package/lean/redsocks2           && cd ..
+        
+    - name: Update & Install feeds
+      working-directory: ./openwrt
+      run: |
+        ./scripts/feeds clean
+        ./scripts/feeds update -a
+        ./scripts/feeds update -a
+        ./scripts/feeds install -a
+        ./scripts/feeds install -a
+        # fix upx issue
+        #cd staging_dir/host/bin/
+        #ln -s /usr/bin/upx upx
+        #ln -s /usr/bin/upx-ucl upx-ucl
+    #- name: Import external feeds
+    #  working-directory: ./openwrt
+    #  run: |
+    #    git clone https://github.com/Lienol/openwrt-package package/lienol
+    #    git clone "your_github_link" package/"your_folder_name"    
+
+    - name: Configuration Customization - Build_x86_64_Lienol
+      env:
+        CONFIG_FILE: 'x86_64_lienol.config'
+      run: |
+        [ -e $CONFIG_FILE ] && mv $CONFIG_FILE openwrt/.config
+        cd openwrt && chmod +x ./customize.sh && ./customize.sh
+        make defconfig
+        
+    - name: Download package
+      working-directory: ./openwrt
+      run: |
+        make download -j$(nproc)
+        find dl -size -1024c -exec ls -l {} \;
+        find dl -size -1024c -exec rm -f {} \;
+    - name: Build firmware
+      working-directory: ./openwrt
+      run: |
+        echo -e "$(nproc) thread build."
+        make -j$(nproc) V=s
+    - name : Upload artifact
+      uses: actions/upload-artifact@master
+      with:
+        name: OpenWrt
+        path: openwrt/bin
