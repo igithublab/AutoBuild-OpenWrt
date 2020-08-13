@@ -15,5 +15,7 @@ sed -i 's/1.openwrt.pool.ntp.org/time1.cloud.tencent.com/g' openwrt/package/base
 sed -i 's/2.openwrt.pool.ntp.org/time.ustc.edu.cn/g' openwrt/package/base-files/files/bin/config_generate
 sed -i 's/3.openwrt.pool.ntp.org/pool.ntp.org/g' openwrt/package/base-files/files/bin/config_generate
 
+cat openwrt/package/base-files/files/bin/config_generate
+
 # Modify WiFi SSID
 #sed -i 's/set wireless.default_radio\${devidx}.ssid=OpenWrt/set wireless.default_radio\${devidx}.ssid=YourSSID/g' openwrt/package/kernel/mac80211/files/lib/wifi/mac80211.sh
