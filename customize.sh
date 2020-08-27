@@ -19,3 +19,6 @@ cat openwrt/package/base-files/files/bin/config_generate
 
 # Modify WiFi SSID
 #sed -i 's/set wireless.default_radio\${devidx}.ssid=OpenWrt/set wireless.default_radio\${devidx}.ssid=YourSSID/g' openwrt/package/kernel/mac80211/files/lib/wifi/mac80211.sh
+
+# Force to enable WIFI
+sed -i 's/set wireless.radio\${devidx}.disabled=1/set wireless.radio\${devidx}.disabled=0/g' openwrt/package/kernel/mac80211/files/lib/wifi/mac80211.sh
