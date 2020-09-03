@@ -70,8 +70,8 @@ jobs:
         REPO_URL: https://github.com/coolsnowwolf/lede
       run: |
         git clone $REPO_URL
-        scp -rp lede/package/lean/microsocks openwrt/package/lean/
-        scp -rp lede/package/lean/redsocks2  openwrt/package/lean/
+        cp -rp lede/package/lean/microsocks openwrt/package/lean/
+        cp -rp lede/package/lean/redsocks2  openwrt/package/lean/
         cd openwrt/package/lean/
         git clone https://github.com/fw876/helloworld
         
