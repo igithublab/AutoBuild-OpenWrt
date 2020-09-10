@@ -81,11 +81,7 @@ jobs:
         ./scripts/feeds clean
         ./scripts/feeds update -a
         ./scripts/feeds install -a
-        ./scripts/feeds install -a
-        # fix upx issue
-        #cd staging_dir/host/bin/
-        #ln -s /usr/bin/upx upx
-        #ln -s /usr/bin/upx-ucl upx-ucl
+        
     #- name: Import external feeds
     #  working-directory: ./openwrt
     #  run: |
@@ -106,11 +102,13 @@ jobs:
         make download -j$(nproc)
         find dl -size -1024c -exec ls -l {} \;
         find dl -size -1024c -exec rm -f {} \;
+        
     - name: Build firmware
       working-directory: ./openwrt
       run: |
         echo -e "$(nproc) thread build."
         make -j$(nproc) V=s
+        
     - name : Upload artifact
       uses: actions/upload-artifact@master
       with:
