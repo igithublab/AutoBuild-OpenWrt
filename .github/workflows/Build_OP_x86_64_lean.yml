@@ -65,13 +65,6 @@ jobs:
       run: |
         git clone $REPO_URL
     
-    - name: Update & Install feeds
-      working-directory: ./lede
-      run: |
-        ./scripts/feeds clean
-        ./scripts/feeds update -a
-        ./scripts/feeds install -a
-        
     - name: Add other source code
       working-directory: ./lede
       run: |
@@ -213,6 +206,13 @@ jobs:
 
         chmod +x files/etc/openclash/core/clash*
         
+    - name: Update & Install feeds
+      working-directory: ./lede
+      run: |
+        ./scripts/feeds clean
+        ./scripts/feeds update -a
+        ./scripts/feeds install -a
+
     - name: Configuration Customization
       env:
         CONFIG_FILE: 'x86_64_lean.config'
