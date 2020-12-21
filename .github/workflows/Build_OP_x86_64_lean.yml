@@ -14,7 +14,9 @@ on:
   push:
     branches: 
       - master
-
+    paths:
+      - 'x86_64_lean.config'
+        
   #schedule:
   #  - cron: 0 8 * * 5
   
