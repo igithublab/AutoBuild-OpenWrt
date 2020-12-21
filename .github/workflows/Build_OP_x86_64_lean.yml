@@ -64,6 +64,7 @@ jobs:
         REPO_URL: https://github.com/coolsnowwolf/lede
       run: |
         git clone $REPO_URL
+        ln -s lede openwrt
     
     - name: Update & Install feeds
       working-directory: ./lede
