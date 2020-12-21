@@ -64,7 +64,6 @@ jobs:
         REPO_URL: https://github.com/coolsnowwolf/lede
       run: |
         git clone $REPO_URL
-        ln -sf lede ~/lede
     
     - name: Update & Install feeds
       working-directory: ./lede
@@ -74,15 +73,16 @@ jobs:
         ./scripts/feeds install -a
         
     - name: Add other source code
+      working-directory: ./lede
       run: |
         # Add luci-app-ssr-plus
-        cd ~/lede/package/lean
+        cd package/lean
         git clone --depth=1 https://github.com/fw876/helloworld
-        cd ~/lede
+        cd -
 
         # Clone community packages to package/community
         mkdir package/community
-        cd ~/lede/package/community
+        cd package/community
 
         # Add Lienol's Packages
         git clone --depth=1 https://github.com/Lienol/openwrt-package
@@ -159,45 +159,45 @@ jobs:
 
         # Add OpenAppFilter
         git clone --depth=1 https://github.com/destan19/OpenAppFilter
-        cd ~/lede
+        cd -
 
         # Mod zzz-default-settings
-        cd ~/lede/package/lean/default-settings/files
+        cd package/lean/default-settings/files
         sed -i "/commit luci/i\uci set luci.main.mediaurlbase='/luci-static/argon'" zzz-default-settings
         sed -i '/http/d' zzz-default-settings
         sed -i '/exit/i\chmod +x /bin/ipv6-helper' zzz-default-settings
-        cd ~/lede
+        cd -
 
         # Fix libssh
-        cd ~/lede/feeds/packages/libs
+        cd feeds/packages/libs
         rm -rf libssh
         svn co https://github.com/openwrt/packages/trunk/libs/libssh
-        cd ~/lede
+        cd -
 
         # Use Lienol's https-dns-proxy package
-        cd ~/lede/feeds/packages/net
+        cd feeds/packages/net
         rm -rf https-dns-proxy
         svn co https://github.com/Lienol/openwrt-packages/trunk/net/https-dns-proxy
-        cd ~/lede
+        cd -
 
         # Use snapshots syncthing package
-        cd ~/lede/feeds/packages/utils
+        cd feeds/packages/utils
         rm -rf syncthing
         svn co https://github.com/openwrt/packages/trunk/utils/syncthing
-        cd ~/lede
+        cd -
 
         # Fix mt76 wireless driver
-        cd ~/lede/package/kernel/mt76
+        cd package/kernel/mt76
         rm -f Makefile
         wget https://raw.githubusercontent.com/openwrt/openwrt/master/package/kernel/mt76/Makefile
         sed -i '/mt7662u_rom_patch.bin/a\\techo mt76-usb disable_usb_sg=1 > $\(1\)\/etc\/modules.d\/mt76-usb' Makefile
-        cd ~/lede
+        cd -
 
         # Add po2lmo
         git clone https://github.com/openwrt-dev/po2lmo.git
-        cd ~/lede/po2lmo
+        cd po2lmo
         make && sudo make install
-        cd ~/lede
+        cd -
 
         # Add openclash
         mkdir -p files/etc/openclash/core
@@ -212,9 +212,8 @@ jobs:
         wget -qO- $clash_game_url | tar xOvz > files/etc/openclash/core/clash_game
 
         chmod +x files/etc/openclash/core/clash*
-        cd ~/lede
         
-    - name: Configuration Customization - Build_x86_64_Lean
+    - name: Configuration Customization
       env:
         CONFIG_FILE: 'x86_64_lean.config'
       run: |
