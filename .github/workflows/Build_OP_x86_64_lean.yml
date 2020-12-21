@@ -1,0 +1,240 @@
+#=================================================
+# Description: Build OpenWrt using GitHub Actions
+# Lisence: MIT
+# Author: Ivan Liao
+# Date: 2020-12-21
+#=================================================
+
+name: Build_x86_64_Lean
+
+on: 
+  release:
+    types: [published]
+
+  push:
+    branches: 
+      - master
+
+  #schedule:
+  #  - cron: 0 8 * * 5
+  
+  #watch:
+  #  types: [started]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout
+      uses: actions/checkout@master
+
+    - name: Initialization environment
+      env:
+        DEBIAN_FRONTEND: noninteractive
+      run: |
+        docker rmi `docker images -q`
+        echo "Deleting files, please wait ..."
+        sudo rm -rf \
+          /usr/share/dotnet \
+          /etc/mysql \
+          /etc/php
+        sudo -E apt-get -y purge \
+          azure-cli \
+          ghc* \
+          zulu* \
+          hhvm \
+          llvm* \
+          firefox \
+          google* \
+          dotnet* \
+          powershell \
+          openjdk* \
+          mysql* \
+          php*
+        sudo -E apt-get update
+        sudo -E apt-get -y install build-essential asciidoc binutils bzip2 gawk gettext git libncurses5-dev patch unzip lib32gcc1 libc6-dev-i386 subversion flex node-uglify gcc-multilib g++-multilib p7zip p7zip-full msmtp libssl-dev texinfo libglib2.0-dev xmlto qemu-utils libelf-dev autoconf automake libtool autopoint device-tree-compiler libuv-dev python3.6 zlib1g-dev upx-ucl antlr3 gperf libz-dev python3.5 python2.7 uglifyjs git-core upx
+        sudo -E apt-get -y autoremove --purge
+        sudo -E apt-get clean
+        
+    - name: Clone Lean's source code
+      env: 
+        REPO_URL: https://github.com/coolsnowwolf/lede
+      run: |
+        git clone $REPO_URL
+        
+    - name: Add other source code
+      run: |
+        # Add luci-app-ssr-plus
+        cd ~/lede/package/lean
+        git clone --depth=1 https://github.com/fw876/helloworld
+        cd ~/lede
+
+        # Clone community packages to package/community
+        mkdir package/community
+        cd ~/lede/package/community
+
+        # Add Lienol's Packages
+        git clone --depth=1 https://github.com/Lienol/openwrt-package
+
+        # Add luci-app-passwall
+        git clone --depth=1 https://github.com/xiaorouji/openwrt-passwall
+
+        # Add luci-app-vssr <M>
+        git clone --depth=1 https://github.com/jerrykuku/lua-maxminddb.git
+        git clone --depth=1 https://github.com/jerrykuku/luci-app-vssr
+
+        # Add mentohust & luci-app-mentohust
+        git clone --depth=1 https://github.com/BoringCat/luci-app-mentohust
+        git clone --depth=1 https://github.com/KyleRicardo/MentoHUST-OpenWrt-ipk
+
+        # Add minieap & luci-proto-minieap
+        git clone --depth=1 https://github.com/ysc3839/luci-proto-minieap
+        svn co https://github.com/project-openwrt/openwrt/trunk/package/ntlf9t/minieap
+
+        # Add ServerChan
+        git clone --depth=1 https://github.com/tty228/luci-app-serverchan
+
+        # Add OpenClash
+        git clone --depth=1 -b master https://github.com/vernesong/OpenClash
+
+        # Add luci-app-onliner (need luci-app-nlbwmon)
+        git clone --depth=1 https://github.com/rufengsuixing/luci-app-onliner
+
+        # Add luci-app-adguardhome
+        svn co https://github.com/Lienol/openwrt/trunk/package/diy/luci-app-adguardhome
+        svn co https://github.com/Lienol/openwrt/trunk/package/diy/adguardhome
+
+        # Add luci-app-diskman
+        git clone --depth=1 https://github.com/lisaac/luci-app-diskman
+        mkdir parted
+        cp luci-app-diskman/Parted.Makefile parted/Makefile
+
+        # Add luci-app-dockerman
+        rm -rf ../lean/luci-app-docker
+        git clone --depth=1 https://github.com/KFERMercer/luci-app-dockerman
+        git clone --depth=1 https://github.com/lisaac/luci-lib-docker
+
+        # Add luci-app-gowebdav
+        git clone --depth=1 https://github.com/project-openwrt/openwrt-gowebdav
+
+        # Add luci-app-jd-dailybonus
+        git clone --depth=1 https://github.com/jerrykuku/luci-app-jd-dailybonus
+
+        # Add luci-theme-argon
+        git clone --depth=1 -b 18.06 https://github.com/jerrykuku/luci-theme-argon
+        git clone --depth=1 https://github.com/jerrykuku/luci-app-argon-config
+        rm -rf ../lean/luci-theme-argon
+
+        # Add tmate
+        git clone --depth=1 https://github.com/project-openwrt/openwrt-tmate
+
+        # Add subconverter
+        git clone --depth=1 https://github.com/tindy2013/openwrt-subconverter
+
+        # Add gotop
+        svn co https://github.com/project-openwrt/openwrt/trunk/package/ctcgfw/gotop
+
+        # Add smartdns
+        svn co https://github.com/pymumu/smartdns/trunk/package/openwrt ../smartdns
+        svn co https://github.com/project-openwrt/openwrt/trunk/package/ntlf9t/luci-app-smartdns ../luci-app-smartdns
+
+        # Add luci-app-udp2raw
+        svn co https://github.com/project-openwrt/openwrt/trunk/package/ntlf9t/luci-app-udp2raw
+        svn co https://github.com/project-openwrt/openwrt/trunk/package/ntlf9t/openwrt-udp2raw
+
+        # Add luci-app-speederv2
+        svn co https://github.com/project-openwrt/openwrt/trunk/package/ntlf9t/luci-app-speederv2
+        svn co https://github.com/project-openwrt/packages/trunk/net/udpspeeder
+
+        # Add OpenAppFilter
+        git clone --depth=1 https://github.com/destan19/OpenAppFilter
+        cd ~/lede
+
+        # Mod zzz-default-settings
+        cd ~/lede/package/lean/default-settings/files
+        sed -i "/commit luci/i\uci set luci.main.mediaurlbase='/luci-static/argon'" zzz-default-settings
+        sed -i '/http/d' zzz-default-settings
+        sed -i '/exit/i\chmod +x /bin/ipv6-helper' zzz-default-settings
+        cd ~/lede
+
+        # Fix libssh
+        cd ~/lede/feeds/packages/libs
+        rm -rf libssh
+        svn co https://github.com/openwrt/packages/trunk/libs/libssh
+        cd ~/lede
+
+        # Use Lienol's https-dns-proxy package
+        cd ~/lede/feeds/packages/net
+        rm -rf https-dns-proxy
+        svn co https://github.com/Lienol/openwrt-packages/trunk/net/https-dns-proxy
+        cd ~/lede
+
+        # Use snapshots syncthing package
+        cd ~/lede/feeds/packages/utils
+        rm -rf syncthing
+        svn co https://github.com/openwrt/packages/trunk/utils/syncthing
+        cd ~/lede
+
+        # Fix mt76 wireless driver
+        cd ~/lede/package/kernel/mt76
+        rm -f Makefile
+        wget https://raw.githubusercontent.com/openwrt/openwrt/master/package/kernel/mt76/Makefile
+        sed -i '/mt7662u_rom_patch.bin/a\\techo mt76-usb disable_usb_sg=1 > $\(1\)\/etc\/modules.d\/mt76-usb' Makefile
+        cd ~/lede
+
+        # Add po2lmo
+        git clone https://github.com/openwrt-dev/po2lmo.git
+        cd ~/lede/po2lmo
+        make && sudo make install
+        cd ~/lede
+
+
+        # Add openclash
+        mkdir -p files/etc/openclash/core
+
+        # clash_main_url=$(curl -sL https://api.github.com/repos/vernesong/OpenClash/releases/tags/Clash | grep /clash-linux-armv8 | sed 's/.*url\": \"//g' | sed 's/\"//g')
+        clash_main_url=$(curl -sL https://api.github.com/repos/Dreamacro/clash/releases/tags/v1.3.0 | grep /clash-linux-armv8 | sed 's/.*url\": \"//g' | sed 's/\"//g')
+        clash_tun_url=$(curl -sL https://api.github.com/repos/vernesong/OpenClash/releases/tags/TUN-Premium | grep /clash-linux-armv8 | sed 's/.*url\": \"//g' | sed 's/\"//g')
+        clash_game_url=$(curl -sL https://api.github.com/repos/vernesong/OpenClash/releases/tags/TUN | grep /clash-linux-armv8 | sed 's/.*url\": \"//g' | sed 's/\"//g')
+
+        wget -qO- $clash_main_url | gunzip -c > files/etc/openclash/core/clash
+        wget -qO- $clash_tun_url | gunzip -c > files/etc/openclash/core/clash_tun
+        wget -qO- $clash_game_url | tar xOvz > files/etc/openclash/core/clash_game
+
+        chmod +x files/etc/openclash/core/clash*
+        cd ~/lede
+        
+    - name: Update & Install feeds
+      working-directory: ./lede
+      run: |
+        ./scripts/feeds clean
+        ./scripts/feeds update -a
+        ./scripts/feeds install -a
+        
+    - name: Configuration Customization - Build_x86_64_Lean
+      env:
+        CONFIG_FILE: 'x86_64_lean.config'
+      run: |
+        [ -e $CONFIG_FILE ] && mv $CONFIG_FILE lede/.config
+        chmod +x ./customize.sh && ./customize.sh
+        cd lede && make defconfig
+        
+    - name: Download package
+      working-directory: ./lede
+      run: |
+        make download -j$(nproc) || make download -j1
+        find dl -size -1024c -exec ls -l {} \;
+        find dl -size -1024c -exec rm -f {} \;
+        
+    - name: Build firmware
+      working-directory: ./lede
+      run: |
+        echo -e "$(nproc) thread build."
+        make -j$(nproc) V=s || make -j1 V=s
+        
+    - name : Upload artifact
+      uses: actions/upload-artifact@master
+      with:
+        name: Lede
+        path: lede/bin
