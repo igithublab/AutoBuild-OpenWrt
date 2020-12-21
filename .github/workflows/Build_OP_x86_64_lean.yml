@@ -64,6 +64,13 @@ jobs:
         REPO_URL: https://github.com/coolsnowwolf/lede
       run: |
         git clone $REPO_URL
+    
+    - name: Update & Install feeds
+      working-directory: ./lede
+      run: |
+        ./scripts/feeds clean
+        ./scripts/feeds update -a
+        ./scripts/feeds install -a
         
     - name: Add other source code
       run: |
@@ -191,7 +198,6 @@ jobs:
         make && sudo make install
         cd ~/lede
 
-
         # Add openclash
         mkdir -p files/etc/openclash/core
 
@@ -206,13 +212,6 @@ jobs:
 
         chmod +x files/etc/openclash/core/clash*
         cd ~/lede
-        
-    - name: Update & Install feeds
-      working-directory: ./lede
-      run: |
-        ./scripts/feeds clean
-        ./scripts/feeds update -a
-        ./scripts/feeds install -a
         
     - name: Configuration Customization - Build_x86_64_Lean
       env:
