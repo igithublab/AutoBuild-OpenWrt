@@ -106,5 +106,5 @@ jobs:
     - name : Upload artifact
       uses: actions/upload-artifact@master
       with:
-        name: OpenWrt
+        name: OpenWrt-amd64_$(date +"%Y%m%d%H%M")
         path: openwrt/bin
