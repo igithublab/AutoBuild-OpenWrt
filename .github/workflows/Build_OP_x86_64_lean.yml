@@ -237,5 +237,5 @@ jobs:
     - name : Upload artifact
       uses: actions/upload-artifact@master
       with:
-        name: Lede
+        name: Lede-amd64-lean_$(date +"%Y%m%d%H%M")
         path: lede/bin
